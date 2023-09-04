@@ -1,0 +1,101 @@
+version: "3"
+services:
+ zookeeper:
+   image: confluentinc/cp-zookeeper
+   ports:
+     - "2181:2181"
+   environment:
+     ZOOKEEPER_CLIENT_PORT: 2181
+     ZOOKEEPER_TICK_TIME: 2000
+   networks:
+     - default
+
+ kafka:
+   image: confluentinc/cp-kafka
+   links:
+     - zookeeper
+   ports:
+     - "9092:9092"
+   networks:
+     - default
+   volumes:
+     - "./service/kafka/docker.sock:/var/run/docker.sock"
+     - "./service/kafka/:/kafka"
+   environment:
+     KAFKA_BROKER_ID: 1
+     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://10.10.37.115:9092'
+     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+ mysql-v8:
+    build:
+      context: ./service/mysql
+      dockerfile: Dockerfile
+    expose:
+      - 3306
+    ports:
+      - 3306:3306
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=overseas
+      - MYSQL_USER=test_01
+      - MYSQL_PASSWORD=test123456
+    networks:
+      - default
+    volumes:
+      - ./service/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./service/mysql/init/:/docker-entrypoint-initdb.d/
+      - ./service/mysql/data/:/var/lib/mysql-data/
+      - ./service/mysql/sql:/opt/sql
+
+ redis-v5:
+    build:
+      context: ./service/redis
+      dockerfile: Dockerfile
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+    volumes:
+      - ./service/redis/redis.conf:/etc/redis.conf:ro
+      - ./data/redis:/data/:rw
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+      - NET_ADMIN
+    tty: true
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - default
+    entrypoint: [ "redis-server", "/etc/redis.conf" ]
+
+ kafka-ui:
+   container_name: kafka-ui
+   image: provectuslabs/kafka-ui:latest
+   ports:
+     - 8080:8080
+   environment:
+     DYNAMIC_CONFIG_ENABLED: 'true'
+   volumes:
+     - ./service/kafka-ui/config.yaml:/etc/kafkaui/dynamic_config.yaml
+   networks:
+     - default
+ postgres:
+   image: postgres:12-alpine
+   container_name: 12_postgres
+   restart: always
+   environment:
+     POSTGRES_USER: root
+     POSTGRES_PASSWORD: 123456
+   ports:
+     - 5432:5432
+   volumes:
+     - ./data/postgresql:/var/lib/postgresql/data
+   networks:
+     - default
