@@ -1,56 +1,68 @@
 version: "3.7"
+networks:
+  mynetwork:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.0.0/24
 services:
-
-#kafka web UI
- kafka-ui:
+  # Kafka web UI
+  kafka-ui:
     container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
+    image: provectuslabs/kafka-ui:b0583a3ca7d58bd9978e26a67bb8927fcbf03c42
+    depends_on:
+      - kafka
     ports:
       - 8080:8080
     environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: "My Kafka Cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka:9092"
     volumes:
-      - ./service/kafka-ui/config.yaml:/etc/kafkaui/dynamic_config.yaml
+      - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
     networks:
-      - default
+      mynetwork:
+        ipv4_address: 192.168.0.2
 
-# ======= zookeeper 组件 for kafka start =======
- zookeeper:
-   image: confluentinc/cp-zookeeper
-   ports:
-     - "2181:2181"
-   environment:
-     ZOOKEEPER_CLIENT_PORT: 2181
-     ZOOKEEPER_TICK_TIME: 2000
-   networks:
-     - default
-# ======= zookeeper 组件 for kafka end =======
+  # ZooKeeper component for Kafka
+  zookeeper:
+    container_name: cp-zk-7.5
+    image: confluentinc/cp-zookeeper:7.5.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.0.3
 
-# =======  confluent kafka start =======
- kafka:
-   image: confluentinc/cp-kafka:7.5.0
-   links:
-     - zookeeper
-   ports:
-     - "9092:9092"
-   networks:
-     - default
-   volumes:
-     - "./service/kafka/docker.sock:/var/run/docker.sock"
-     - "./service/kafka/:/kafka"
-   environment:
-     KAFKA_BROKER_ID: 1
-     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9092'
-     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-# =======  confluent kafka end =======
+  # Confluent Kafka
+  kafka:
+    container_name: cp-kafka-7.5
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    volumes:
+      - "./service/kafka/docker.sock:/var/run/docker.sock"
+      - "./service/kafka/:/kafka"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.0.4
 
-# =====  mysql v8 版本配置 start ====
- mysql-v8:
+  mysql-v8:
+    container_name: MySQLV8
     build:
       context: ./service/mysql
       dockerfile: Dockerfile
@@ -63,8 +75,6 @@ services:
       - MYSQL_ROOT_PASSWORD=123456
       - MYSQL_USER=test_01
       - MYSQL_PASSWORD=123456
-    networks:
-      - default
     volumes:
       # 数据挂载
       - ./data/mysql:/var/lib/mysql-data/:rw
@@ -77,27 +87,31 @@ services:
     command:
       # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
       --default-authentication-plugin=mysql_native_password
-   # =====  mysql v8 版本配置 end ====
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.0.5
+  # =====  mysql v8 版本配置 end ====
 
+  # ===== mongodb start =====
+  mongodb-v6:
+    container_name: MongoV6
+    build:
+      context: service/mongodb-standalone
+      dockerfile: Dockerfile
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
+      - ./data/mongodb:/data/db:rw
+    command: mongod -f /etc/mongod.conf
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.0.6
+  # ===== mongodb end =====
 
-# ===== mongodb start =====
- mongodb-v6:
-   build:
-     context: service/mongodb-standalone
-     dockerfile: Dockerfile
-   ports:
-     - "27017:27017"
-   volumes:
-     - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
-     - ./data/mongodb:/data/db:rw
-   command: mongod -f /etc/mongod.conf
-   networks:
-     - default
-# ===== mongodb end =====
-
-
-# =====  redis v5 版本配置 start ====
- redis-v5:
+  # =====  redis v5 版本配置 start ====
+  redis-v5:
+    container_name: RedisV5
     build:
       context: ./service/redis
       dockerfile: Dockerfile
@@ -115,23 +129,25 @@ services:
     tty: true
     environment:
       - TZ=Asia/Shanghai
+    entrypoint: ["redis-server", "/etc/redis.conf"]
     networks:
-      - default
-    entrypoint: [ "redis-server", "/etc/redis.conf" ]
-# =====  redis v5 版本配置 end ====
+      mynetwork:
+        ipv4_address: 192.168.0.7
+  # =====  redis v5 版本配置 end ====
 
-# =====  postgres v12 版本配置 start ====
- postgres:
-   image: postgres:12.16
-   container_name: postgresV12
-   restart: always
-   environment:
-     POSTGRES_USER: root
-     POSTGRES_PASSWORD: 123456
-   ports:
-     - 5432:5432
-   volumes:
-     - ./data/postgresql:/var/lib/postgresql/data
-   networks:
-     - default
+  # =====  postgres v12 版本配置 start ====
+  postgres:
+    container_name: postgresV12
+    image: postgres:12.16
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.0.8
 # =====  postgres v12 版本配置 end ====

@@ -1,0 +1,11 @@
+auth:
+  type: DISABLED
+kafka:
+  clusters:
+  - bootstrapServers: 198.19.249.3:9092
+    name: 198.19.249.3
+    properties: {}
+    readOnly: false
+rbac:
+  roles: []
+webclient: {}
