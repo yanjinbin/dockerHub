@@ -1,5 +1,20 @@
-version: "3"
+version: "3.7"
 services:
+
+#kafka web UI
+ kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    volumes:
+      - ./service/kafka-ui/config.yaml:/etc/kafkaui/dynamic_config.yaml
+    networks:
+      - default
+
+# ======= zookeeper 组件 for kafka start =======
  zookeeper:
    image: confluentinc/cp-zookeeper
    ports:
@@ -9,9 +24,11 @@ services:
      ZOOKEEPER_TICK_TIME: 2000
    networks:
      - default
+# ======= zookeeper 组件 for kafka end =======
 
+# =======  confluent kafka start =======
  kafka:
-   image: confluentinc/cp-kafka
+   image: confluentinc/cp-kafka:7.5.0
    links:
      - zookeeper
    ports:
@@ -24,13 +41,15 @@ services:
    environment:
      KAFKA_BROKER_ID: 1
      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://10.10.37.115:9092'
+     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9092'
      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+# =======  confluent kafka end =======
 
+# =====  mysql v8 版本配置 start ====
  mysql-v8:
     build:
       context: ./service/mysql
@@ -42,17 +61,42 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=overseas
       - MYSQL_USER=test_01
-      - MYSQL_PASSWORD=test123456
+      - MYSQL_PASSWORD=123456
     networks:
       - default
     volumes:
+      # 数据挂载
+      - ./data/mysql:/var/lib/mysql-data/:rw
+      # 配置挂载
       - ./service/mysql/my.cnf:/etc/mysql/my.cnf
-      - ./service/mysql/init/:/docker-entrypoint-initdb.d/
-      - ./service/mysql/data/:/var/lib/mysql-data/
+      # 初始化脚本
+      - ./service/mysql/init:/docker-entrypoint-initdb.d/
+      # 初始化sql脚本存放位置
       - ./service/mysql/sql:/opt/sql
+    command:
+      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
+      --default-authentication-plugin=mysql_native_password
+   # =====  mysql v8 版本配置 end ====
 
+
+# ===== mongodb start =====
+ mongodb-v6:
+   build:
+     context: service/mongodb-standalone
+     dockerfile: Dockerfile
+   ports:
+     - "27017:27017"
+   volumes:
+     - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
+     - ./data/mongodb:/data/db:rw
+   command: mongod -f /etc/mongod.conf
+   networks:
+     - default
+# ===== mongodb end =====
+
+
+# =====  redis v5 版本配置 start ====
  redis-v5:
     build:
       context: ./service/redis
@@ -74,21 +118,12 @@ services:
     networks:
       - default
     entrypoint: [ "redis-server", "/etc/redis.conf" ]
+# =====  redis v5 版本配置 end ====
 
- kafka-ui:
-   container_name: kafka-ui
-   image: provectuslabs/kafka-ui:latest
-   ports:
-     - 8080:8080
-   environment:
-     DYNAMIC_CONFIG_ENABLED: 'true'
-   volumes:
-     - ./service/kafka-ui/config.yaml:/etc/kafkaui/dynamic_config.yaml
-   networks:
-     - default
+# =====  postgres v12 版本配置 start ====
  postgres:
-   image: postgres:12-alpine
-   container_name: 12_postgres
+   image: postgres:12.16
+   container_name: postgresV12
    restart: always
    environment:
      POSTGRES_USER: root
@@ -99,3 +134,4 @@ services:
      - ./data/postgresql:/var/lib/postgresql/data
    networks:
      - default
+# =====  postgres v12 版本配置 end ====
