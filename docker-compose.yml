@@ -60,39 +60,59 @@ services:
     networks:
       mynetwork:
         ipv4_address: 192.168.0.4
-
-  mysql-v8:
+  mysql:
     container_name: MySQLV8
-    build:
-      context: ./service/mysql
-      dockerfile: Dockerfile
-    expose:
-      - 3306
-    ports:
-      - 3306:3306
+    image: mysql:8.0.32
     environment:
-      - TZ=Asia/Shanghai
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_USER=test_01
-      - MYSQL_PASSWORD=123456
+      MYSQL_ROOT_PASSWORD: '123456'
+    expose:
+      - '3306'
+    ports:
+      - '3306:3306'
     volumes:
-      # 数据挂载
-      - ./data/mysql:/var/lib/mysql-data/:rw
-      # 配置挂载
+      # mysql 配置文件
       - ./service/mysql/my.cnf:/etc/mysql/my.cnf
-      # 初始化脚本
-      - ./service/mysql/init:/docker-entrypoint-initdb.d/
-      # 初始化sql脚本存放位置
-      - ./service/mysql/sql:/opt/sql
-    command:
-      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
-      --default-authentication-plugin=mysql_native_password
+      # 数据挂载
+      - ./data/mysql:/var/lib/mysql
+      # 初始化
+      - ./service/mysql/init:/docker-entrypoint-initdb.d
+    command: [ "mysqld", "--default-authentication-plugin=mysql_native_password" ]
     networks:
       mynetwork:
         ipv4_address: 192.168.0.5
+
+#  mysql-v8:
+#    container_name: MySQLV8
+#    build:
+#      context: ./service/mysql
+#      dockerfile: Dockerfile
+#    expose:
+#      - 3306
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - TZ=Asia/Shanghai
+#      - MYSQL_ROOT_PASSWORD=123456
+#      - MYSQL_USER=test_01
+#      - MYSQL_PASSWORD=123456
+#    volumes:
+#      # 数据挂载
+#      - ./data/mysql:/var/lib/mysql-data/:rw
+#      # 配置挂载
+#      - ./service/mysql/my.cnf:/etc/mysql/my.cnf
+#      # 初始化脚本
+#      - ./service/mysql/init:/docker-entrypoint-initdb.d/
+#      # 初始化sql脚本存放位置
+#      - ./service/mysql/sql:/opt/sql
+#    command:
+#      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
+#      --default-authentication-plugin=mysql_native_password
+#    networks:
+#      mynetwork:
+#        ipv4_address: 192.168.0.5
   # =====  mysql v8 版本配置 end ====
 
-  # ===== mongodb start =====
+# ===== mongodb start =====
   mongodb-v6:
     container_name: MongoV6
     build:
@@ -107,9 +127,9 @@ services:
     networks:
       mynetwork:
         ipv4_address: 192.168.0.6
-  # ===== mongodb end =====
+# ===== mongodb end =====
 
-  # =====  redis v5 版本配置 start ====
+# =====  redis v5 版本配置 start ====
   redis-v5:
     container_name: RedisV5
     build:

@@ -1,3 +1,6 @@
+-- 创建用户
+CREATE USER 'test_01'@'%' IDENTIFIED BY '123456';
+
 -- 创建数据库
 CREATE
 DATABASE  `nacos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
