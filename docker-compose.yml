@@ -4,7 +4,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 192.168.0.0/24
+        - subnet: 192.168.1.0/24
 services:
   # Kafka web UI
   kafka-ui:
@@ -21,7 +21,7 @@ services:
       - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.2
+        ipv4_address: 192.168.1.2
 
   # ZooKeeper component for Kafka
   zookeeper:
@@ -34,7 +34,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.3
+        ipv4_address: 192.168.1.3
 
   # Confluent Kafka
   kafka:
@@ -59,9 +59,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.4
-  mysql:
-    container_name: MySQLV8
+        ipv4_address: 192.168.1.4
+  mysql_v8:
+    container_name: mysql_v8
     image: mysql:8.0.32
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
@@ -79,7 +79,7 @@ services:
     command: [ "mysqld", "--default-authentication-plugin=mysql_native_password" ]
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.5
+        ipv4_address: 192.168.1.5
 
 #  mysql-v8:
 #    container_name: MySQLV8
@@ -109,12 +109,12 @@ services:
 #      --default-authentication-plugin=mysql_native_password
 #    networks:
 #      mynetwork:
-#        ipv4_address: 192.168.0.5
+#        ipv4_address: 192.168.1.5
   # =====  mysql v8 版本配置 end ====
 
 # ===== mongodb start =====
-  mongodb-v6:
-    container_name: MongoV6
+  mongo_6:
+    container_name: mongo_v6
     build:
       context: service/mongodb-standalone
       dockerfile: Dockerfile
@@ -126,12 +126,12 @@ services:
     command: mongod -f /etc/mongod.conf
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.6
+        ipv4_address: 192.168.1.6
 # ===== mongodb end =====
 
 # =====  redis v5 版本配置 start ====
-  redis-v5:
-    container_name: RedisV5
+  redis_5:
+    container_name: redis_v5
     build:
       context: ./service/redis
       dockerfile: Dockerfile
@@ -152,12 +152,12 @@ services:
     entrypoint: ["redis-server", "/etc/redis.conf"]
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.7
+        ipv4_address: 192.168.1.7
   # =====  redis v5 版本配置 end ====
 
   # =====  postgres v12 版本配置 start ====
-  postgres:
-    container_name: postgresV12
+  postgres_12:
+    container_name: postgres_v12
     image: postgres:12.16
     restart: always
     environment:
@@ -169,5 +169,22 @@ services:
       - ./data/postgresql:/var/lib/postgresql/data
     networks:
       mynetwork:
-        ipv4_address: 192.168.0.8
+        ipv4_address: 192.168.1.8
 # =====  postgres v12 版本配置 end ====
+  xxl-job-arm:
+    container_name: xxl-job-arm_v2.4.0
+    image: kuschzzp/xxl-job-aarch64:2.4.0
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC"
+      SPRING_DATASOURCE_USERNAME: "test_01"
+      SPRING_DATASOURCE_PASSWORD: "123456"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+    ports:
+      - 9056:8080
+    volumes:
+      - ./log/xxljobLogs:/data/applogs
+    depends_on:
+      - mysql_v8
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.9
