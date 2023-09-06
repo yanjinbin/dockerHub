@@ -3,4 +3,4 @@ logs
 .idea
 .vscode
 .DS_Store
-log
+log/**
