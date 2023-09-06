@@ -1,8 +1,13 @@
-# mysqlV8 redisV5 mongodbV6 kafka v7.5 的 docker compose 和dockerfile boilerplate
+# docker-compose|dockerfile boilerplate
+## tags: mysqlV8, redisV5, mongodbV6, kafka v7.5 , xxljob(arm architect) , 
+## tags: nacos(arm supported) v2
 
+- MySQL v8: Username: root, Password: 123456
+- Postgres 12: Username: root, Password: 123456
+- Redis: Password: 1234
+- Nacos: Username: nacos, Password: nacos
+
+based on makefile 
 ```shell
-make docker-run 就可以运行
-mysqlv8 用户名密码 root 123456
-postgre12 用户名密码 root 123456
-redis 密码 1234
+make docker-run
 ```
