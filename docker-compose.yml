@@ -65,8 +65,6 @@ services:
     image: mysql:8.0.32
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
-    env_file:
-      - ./service/mysql/env/mysql.env
     expose:
       - '3306'
     ports:
@@ -192,24 +190,34 @@ services:
     ports:
       - 9056:8080
     volumes:
-      - ./log/xxljobLogs:/data/applogs
+      - ./log/xxljob:/data/applogs
     depends_on:
       - mysql_v8
     networks:
       mynetwork:
         ipv4_address: 192.168.1.9
 
-  # ====  xxl-job end  =====
+  # ====  xxl-job end  ====
   nacos:
     image: nacos/nacos-server:v2.2.3-slim
-    container_name: nacos_standalone_v2
-    env_file:
-      - ./service/nacos/env/nacos-standlone-mysql.env
-    volumes:
-      - ./log/nacos/standalone-logs/:/home/nacos/logs
+    container_name: nacos_v2_arm
     ports:
-      - "8848:8848"
-      - "9848:9848"
+      - 8848:8848
+      - 9848:9848
+      - 9849:9849
+    environment:
+      TZ: Asia/Shanghai
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MODE: standalone
+      PREFER_HOST_MODE: hostname
+      MYSQL_SERVICE_HOST: mysql_v8
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: test_01
+      MYSQL_SERVICE_PASSWORD: 123456
+      MYSQL_SERVICE_DB_NAME: nacos
+      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
+    volumes:
+      - ./log/nacos:/home/nacos/logs
     depends_on:
       mysql_v8:
         condition: service_healthy
