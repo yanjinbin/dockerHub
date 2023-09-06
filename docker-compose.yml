@@ -65,6 +65,8 @@ services:
     image: mysql:8.0.32
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
+    env_file:
+      - ./service/mysql/env/mysql.env
     expose:
       - '3306'
     ports:
@@ -76,43 +78,51 @@ services:
       - ./data/mysql:/var/lib/mysql
       # 初始化
       - ./service/mysql/init:/docker-entrypoint-initdb.d
-    command: [ "mysqld", "--default-authentication-plugin=mysql_native_password" ]
+    command: [ "mysqld",
+               "--default-authentication-plugin=mysql_native_password",
+               "--character-set-server=utf8mb4",
+               "--collation-server=utf8mb4_unicode_ci" ]
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
     networks:
       mynetwork:
         ipv4_address: 192.168.1.5
 
-#  mysql-v8:
-#    container_name: MySQLV8
-#    build:
-#      context: ./service/mysql
-#      dockerfile: Dockerfile
-#    expose:
-#      - 3306
-#    ports:
-#      - 3306:3306
-#    environment:
-#      - TZ=Asia/Shanghai
-#      - MYSQL_ROOT_PASSWORD=123456
-#      - MYSQL_USER=test_01
-#      - MYSQL_PASSWORD=123456
-#    volumes:
-#      # 数据挂载
-#      - ./data/mysql:/var/lib/mysql-data/:rw
-#      # 配置挂载
-#      - ./service/mysql/my.cnf:/etc/mysql/my.cnf
-#      # 初始化脚本
-#      - ./service/mysql/init:/docker-entrypoint-initdb.d/
-#      # 初始化sql脚本存放位置
-#      - ./service/mysql/sql:/opt/sql
-#    command:
-#      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
-#      --default-authentication-plugin=mysql_native_password
-#    networks:
-#      mynetwork:
-#        ipv4_address: 192.168.1.5
+  #  mysql-v8:
+  #    container_name: MySQLV8
+  #    build:
+  #      context: ./service/mysql
+  #      dockerfile: Dockerfile
+  #    expose:
+  #      - 3306
+  #    ports:
+  #      - 3306:3306
+  #    environment:
+  #      - TZ=Asia/Shanghai
+  #      - MYSQL_ROOT_PASSWORD=123456
+  #      - MYSQL_USER=test_01
+  #      - MYSQL_PASSWORD=123456
+  #    volumes:
+  #      # 数据挂载
+  #      - ./data/mysql:/var/lib/mysql-data/:rw
+  #      # 配置挂载
+  #      - ./service/mysql/my.cnf:/etc/mysql/my.cnf
+  #      # 初始化脚本
+  #      - ./service/mysql/init:/docker-entrypoint-initdb.d/
+  #      # 初始化sql脚本存放位置
+  #      - ./service/mysql/sql:/opt/sql
+  #    command:
+  #      # 将mysql8.0默认密码策略 修改为 原先 策略 (mysql8.0对其默认策略做了更改 会导致密码无法匹配)
+  #      --default-authentication-plugin=mysql_native_password
+  #    networks:
+  #      mynetwork:
+  #        ipv4_address: 192.168.1.5
   # =====  mysql v8 版本配置 end ====
 
-# ===== mongodb start =====
+  # ===== mongodb start =====
   mongo_6:
     container_name: mongo_v6
     build:
@@ -127,9 +137,9 @@ services:
     networks:
       mynetwork:
         ipv4_address: 192.168.1.6
-# ===== mongodb end =====
+  # ===== mongodb end =====
 
-# =====  redis v5 版本配置 start ====
+  # =====  redis v5 版本配置 start ====
   redis_5:
     container_name: redis_v5
     build:
@@ -149,7 +159,7 @@ services:
     tty: true
     environment:
       - TZ=Asia/Shanghai
-    entrypoint: ["redis-server", "/etc/redis.conf"]
+    entrypoint: [ "redis-server", "/etc/redis.conf" ]
     networks:
       mynetwork:
         ipv4_address: 192.168.1.7
@@ -170,7 +180,7 @@ services:
     networks:
       mynetwork:
         ipv4_address: 192.168.1.8
-# =====  postgres v12 版本配置 end ====
+  # =====  postgres v12 版本配置 end ====
   xxl-job-arm:
     container_name: xxl-job-arm_v2.4.0
     image: kuschzzp/xxl-job-aarch64:2.4.0
@@ -188,3 +198,21 @@ services:
     networks:
       mynetwork:
         ipv4_address: 192.168.1.9
+
+  # ====  xxl-job end  =====
+  nacos:
+    image: nacos/nacos-server:v2.2.3-slim
+    container_name: nacos_standalone_v2
+    env_file:
+      - ./service/nacos/env/nacos-standlone-mysql.env
+    volumes:
+      - ./log/nacos/standalone-logs/:/home/nacos/logs
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    depends_on:
+      mysql_v8:
+        condition: service_healthy
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.10
