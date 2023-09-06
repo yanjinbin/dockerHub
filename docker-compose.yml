@@ -208,3 +208,16 @@ services:
       mynetwork:
         ipv4_address: 192.168.1.10
 # ====  nacos end  ====
+  openresty:
+    image: openresty/openresty:1.21.4.2-0-alpine-fat
+    container_name: openresty_v1.21_alpine_fat
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./log/openresty:/usr/local/openresty/nginx/logs
+      - ./service/openresty/conf.d/:/etc/nginx/conf.d
+    ports:
+      - "10002:80"
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.11
