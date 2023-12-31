@@ -7,21 +7,21 @@ networks:
         - subnet: 192.168.1.0/24
 services:
   # ====== Kafka web UI start ======
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    depends_on:
-      - kafka
-    ports:
-      - 10001:8080
-    environment:
-      KAFKA_CLUSTERS_0_NAME: "My Kafka Cluster"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka:9092"
-    volumes:
-      - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.2
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: provectuslabs/kafka-ui:latest
+  #   depends_on:
+  #     - kafka
+  #   ports:
+  #     - 10001:8080
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: "My Kafka Cluster"
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka:9092"
+  #   volumes:
+  #     - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.2
   # ====== Kafka web UI end ======
 
   # ======= ZooKeeper start =======
@@ -160,53 +160,53 @@ services:
   # =====  postgres end ====
 
   # ====  xxl-job start  ====
-  xxl-job-arm:
-    container_name: xxl-job-arm_v2.4.0
-    image: kuschzzp/xxl-job-aarch64:2.4.0
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC"
-      SPRING_DATASOURCE_USERNAME: "test_01"
-      SPRING_DATASOURCE_PASSWORD: "123456"
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
-    ports:
-      - 9056:8080
-    volumes:
-      - ./log/xxljob:/data/applogs
-    depends_on:
-      - mysql_v8
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.9
+  # xxl-job-arm:
+  #   container_name: xxl-job-arm_v2.4.0
+  #   image: kuschzzp/xxl-job-aarch64:2.4.0
+  #   environment:
+  #     SPRING_DATASOURCE_URL: "jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC"
+  #     SPRING_DATASOURCE_USERNAME: "test_01"
+  #     SPRING_DATASOURCE_PASSWORD: "123456"
+  #     SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+  #   ports:
+  #     - 9056:8080
+  #   volumes:
+  #     - ./log/xxljob:/data/applogs
+  #   depends_on:
+  #     - mysql_v8
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.9
 
   # ====  xxl-job end  ====
 
   # ====  nacos start  ====
-  nacos:
-    image: nacos/nacos-server:v2.2.3-slim
-    container_name: nacos_v2_arm
-    ports:
-      - 8848:8848
-      - 9848:9848
-      - 9849:9849
-    environment:
-      TZ: Asia/Shanghai
-      SPRING_DATASOURCE_PLATFORM: mysql
-      MODE: standalone
-      PREFER_HOST_MODE: hostname
-      MYSQL_SERVICE_HOST: mysql_v8
-      MYSQL_SERVICE_PORT: 3306
-      MYSQL_SERVICE_USER: test_01
-      MYSQL_SERVICE_PASSWORD: 123456
-      MYSQL_SERVICE_DB_NAME: nacos
-      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
-    volumes:
-      - ./log/nacos:/home/nacos/logs
-    depends_on:
-      mysql_v8:
-        condition: service_healthy
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.10
+  # nacos:
+  #   image: nacos/nacos-server:v2.2.3-slim
+  #   container_name: nacos_v2_arm
+  #   ports:
+  #     - 8848:8848
+  #     - 9848:9848
+  #     - 9849:9849
+  #   environment:
+  #     TZ: Asia/Shanghai
+  #     SPRING_DATASOURCE_PLATFORM: mysql
+  #     MODE: standalone
+  #     PREFER_HOST_MODE: hostname
+  #     MYSQL_SERVICE_HOST: mysql_v8
+  #     MYSQL_SERVICE_PORT: 3306
+  #     MYSQL_SERVICE_USER: test_01
+  #     MYSQL_SERVICE_PASSWORD: 123456
+  #     MYSQL_SERVICE_DB_NAME: nacos
+  #     MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
+  #   volumes:
+  #     - ./log/nacos:/home/nacos/logs
+  #   depends_on:
+  #     mysql_v8:
+  #       condition: service_healthy
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.10
 # ====  nacos end  ====
   openresty:
     image: openresty/openresty:1.21.4.2-0-alpine-fat
@@ -217,7 +217,7 @@ services:
       - ./log/openresty:/usr/local/openresty/nginx/logs
       - ./service/openresty/conf.d/:/etc/nginx/conf.d
     ports:
-      - "10002:80"
+      - "10002:8887"
     networks:
       mynetwork:
         ipv4_address: 192.168.1.11
