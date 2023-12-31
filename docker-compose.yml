@@ -1,4 +1,4 @@
-version: "3.7"
+version: '3.7'
 networks:
   mynetwork:
     ipam:
@@ -15,8 +15,8 @@ services:
     ports:
       - 10001:8080
     environment:
-      KAFKA_CLUSTERS_0_NAME: "My Kafka Cluster"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "PLAINTEXT://kafka:9092"
+      KAFKA_CLUSTERS_0_NAME: 'My Kafka Cluster'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'PLAINTEXT://kafka:9092'
     volumes:
       - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
     networks:
@@ -29,7 +29,7 @@ services:
     container_name: cp-zk-7.5
     image: confluentinc/cp-zookeeper:7.5.0
     ports:
-      - "2181:2181"
+      - '2181:2181'
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -45,15 +45,15 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
+      - '9092:9092'
     volumes:
-      - "./service/kafka/docker.sock:/var/run/docker.sock"
-      - "./service/kafka/:/kafka"
+      - './service/kafka/docker.sock:/var/run/docker.sock'
+      - './service/kafka/:/kafka'
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_LISTENERS: "PLAINTEXT://:9092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -69,11 +69,11 @@ services:
     container_name: mysql_v8
     image: mysql:8.0.32
     environment:
-      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_ROOT_PASSWORD: '123456'
     expose:
-      - "3306"
+      - '3306'
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       # mysql 配置文件
       - ./service/mysql/my.cnf:/etc/mysql/my.cnf
@@ -83,16 +83,16 @@ services:
       - ./service/mysql/init:/docker-entrypoint-initdb.d
     command:
       [
-        "mysqld",
-        "--default-authentication-plugin=mysql_native_password",
-        "--character-set-server=utf8mb4",
-        "--collation-server=utf8mb4_unicode_ci",
+        'mysqld',
+        '--default-authentication-plugin=mysql_native_password',
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
       ]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       interval: 5s
-      timeout: 10s
-      retries: 10
+      timeout: 2s
+      retries: 2
     networks:
       mynetwork:
         ipv4_address: 192.168.1.5
@@ -105,7 +105,7 @@ services:
       context: service/mongodb-standalone
       dockerfile: Dockerfile
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
       - ./data/mongodb:/data/db:rw
@@ -135,7 +135,7 @@ services:
     tty: true
     environment:
       - TZ=Asia/Shanghai
-    entrypoint: ["redis-server", "/etc/redis.conf"]
+    entrypoint: ['redis-server', '/etc/redis.conf']
     networks:
       mynetwork:
         ipv4_address: 192.168.1.7
@@ -164,10 +164,10 @@ services:
     container_name: xxl-job-arm_v2.4.0
     image: kuschzzp/xxl-job-aarch64:2.4.0
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC"
-      SPRING_DATASOURCE_USERNAME: "test_01"
-      SPRING_DATASOURCE_PASSWORD: "123456"
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
+      SPRING_DATASOURCE_URL: 'jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC'
+      SPRING_DATASOURCE_USERNAME: 'test_01'
+      SPRING_DATASOURCE_PASSWORD: '123456'
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'com.mysql.cj.jdbc.Driver'
     ports:
       - 9056:8080
     volumes:
@@ -208,16 +208,16 @@ services:
       mynetwork:
         ipv4_address: 192.168.1.10
 # ====  nacos end  ====
-  openresty:
-    image: openresty/openresty:1.21.4.2-0-alpine-fat
-    container_name: openresty_v1.21_alpine_fat
-    environment:
-      - TZ=Asia/Shanghai
-    volumes:
-      - ./log/openresty:/usr/local/openresty/nginx/logs
-      - ./service/openresty/conf.d/:/etc/nginx/conf.d
-    ports:
-      - "10002:80"
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.11
+# openresty:
+#   image: openresty/openresty:1.21.4.2-0-alpine-fat
+#   container_name: openresty_v1.21_alpine_fat
+#   environment:
+#     - TZ=Asia/Shanghai
+#   volumes:
+#     - ./log/openresty:/usr/local/openresty/nginx/logs
+#     - ./service/openresty/conf.d/:/etc/nginx/conf.d
+#   ports:
+#     - "10002:80"
+#   networks:
+#     mynetwork:
+#       ipv4_address: 192.168.1.11

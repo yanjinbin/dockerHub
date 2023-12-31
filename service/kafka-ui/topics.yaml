@@ -1,0 +1,27 @@
+queue:
+  user_action:
+    topic: user_action_base
+  user_theater_action:
+    topic: user_theater_action
+  user_ad_action:
+    topic: user_ad_action
+  report:
+    topic: report
+  user_stay_action:
+    topic: user_stay_action
+  report_game_addiction:
+    topic: report_game_addiction
+  test:
+    topic: test
+  order_report:
+    topic: order_report
+  retention_report:
+    topic: retention_report
+  user_action_form_theater:
+    topic: user_action_form_theater
+  user_action_coin:
+    topic: user_action_coin
+  user_action_recharge_click:
+    topic: user_action_recharge_click
+  user_action_common_burying:
+    topic: user_action_common_burying
