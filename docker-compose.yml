@@ -99,20 +99,20 @@ services:
   # ======== mysql end =======
 
   # ======== mongodb start =======
-  mongo_6:
-    container_name: mongo_v6
-    build:
-      context: service/mongodb-standalone
-      dockerfile: Dockerfile
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
-      - ./data/mongodb:/data/db:rw
-    command: mongod -f /etc/mongod.conf
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.6
+  # mongo_6:
+  #   container_name: mongo_v6
+  #   build:
+  #     context: service/mongodb-standalone
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
+  #     - ./data/mongodb:/data/db:rw
+  #   command: mongod -f /etc/mongod.conf
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.6
   # ===== mongodb end =====
 
   # =====  redis start ====
