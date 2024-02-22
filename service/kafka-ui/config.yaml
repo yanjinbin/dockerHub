@@ -2,8 +2,8 @@ auth:
   type: DISABLED
 kafka:
   clusters:
-  - bootstrapServers: 198.19.249.3:9092
-    name: 198.19.249.3
+  - bootstrapServers: 192.168.50.2:9092
+    name: h28k
     properties: {}
     readOnly: false
 rbac:

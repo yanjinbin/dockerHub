@@ -6,63 +6,74 @@ networks:
       config:
         - subnet: 192.168.1.0/24
 services:
-  # ====== Kafka web UI start ======
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    depends_on:
-      - kafka
-    ports:
-      - 10001:8080
-    environment:
-      KAFKA_CLUSTERS_0_NAME: 'My Kafka Cluster'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'PLAINTEXT://kafka:9092'
-    volumes:
-      - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.2
-  # ====== Kafka web UI end ======
+  # portainerce:
+  #   image: portainer/portainer-ce:2.19.4-alpine
+  #   container_name: portainerce
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./portainer-data:/data
+  #   ports:
+  #     - 9000:9000
 
-  # ======= ZooKeeper start =======
-  zookeeper:
-    container_name: cp-zk-7.5
-    image: confluentinc/cp-zookeeper:7.5.0
-    ports:
-      - '2181:2181'
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.3
-  # ======= ZooKeeper end =======
+  # # ====== Kafka web UI start ======
+  # kafka-ui:
+  #   container_name: kafka-ui
+  #   image: provectuslabs/kafka-ui:latest
+  #   ports:
+  #     - 10001:8080
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: 'My Kafka Cluster'
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'PLAINTEXT://kafka:9092'
+  #   volumes:
+  #     - ./service/kafka-ui/config.yaml:/app/config/kafka-clusters.yaml
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.2
+  # # ====== Kafka web UI end ======
 
-  # ======  Kafka  start =======
-  kafka:
-    container_name: cp-kafka-7.5
-    image: confluentinc/cp-kafka:7.5.0
-    depends_on:
-      - zookeeper
-    ports:
-      - '9092:9092'
-    volumes:
-      - './service/kafka/docker.sock:/var/run/docker.sock'
-      - './service/kafka/:/kafka'
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENERS: 'PLAINTEXT://:9092'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.4
-  # ======  Kafka  end =======
+  # # ======= ZooKeeper start =======
+  # zookeeper:
+  #   container_name: cp-zk-7.5
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   ports:
+  #     - '2181:2181'
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.3
+  # # ======= ZooKeeper end =======
+
+  # # ======  Kafka  start =======
+  # kafka:
+  #   container_name: cp-kafka-7.5
+  #   image: confluentinc/cp-kafka:7.5.0
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - '9092:9092'
+  #   volumes:
+  #     - './service/kafka/docker.sock:/var/run/docker.sock'
+  #     - './service/kafka/:/kafka'
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+  #     KAFKA_LISTENERS: 'PLAINTEXT://:9092'
+  #     KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.4
+  # # ======  Kafka  end =======
 
   # ======== mysql start =======
   mysql_v8:
@@ -99,28 +110,26 @@ services:
   # ======== mysql end =======
 
   # ======== mongodb start =======
-  mongo_6:
-    container_name: mongo_v6
-    build:
-      context: service/mongodb-standalone
-      dockerfile: Dockerfile
-    ports:
-      - '27017:27017'
-    volumes:
-      - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
-      - ./data/mongodb:/data/db:rw
-    command: mongod -f /etc/mongod.conf
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.6
+  # mongo_6:
+  #   container_name: mongo_v6
+  #   build:
+  #     context: service/mongodb-standalone
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - '27017:27017'
+  #   volumes:
+  #     - ./service/mongodb-standalone/mongod.conf:/etc/mongod.conf
+  #     - ./data/mongodb:/data/db:rw
+  #   command: mongod -f /etc/mongod.conf
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.6
   # ===== mongodb end =====
 
   # =====  redis start ====
-  redis_5:
-    container_name: redis_v5
-    build:
-      context: ./service/redis
-      dockerfile: Dockerfile
+  redis_v6:
+    container_name: redis_v6
+    image: redis:6.2
     expose:
       - 6379
     ports:
@@ -135,89 +144,112 @@ services:
     tty: true
     environment:
       - TZ=Asia/Shanghai
+    # command: ["redis-server", "/etc/redis/redis.conf"]
     entrypoint: ['redis-server', '/etc/redis.conf']
     networks:
       mynetwork:
         ipv4_address: 192.168.1.7
   # =====  redis end ====
 
-  # =====  postgres start ====
-  postgres_12:
-    container_name: postgres_v12
-    image: postgres:12.16
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 123456
-    ports:
-      - 5432:5432
-    volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.8
+  # # =====  postgres start ====
+  # postgres_12:
+  #   container_name: postgres_v12
+  #   image: postgres:12.16
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: 123456
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ./data/postgresql:/var/lib/postgresql/data
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.8
 
-  # =====  postgres end ====
+  # # =====  postgres end ====
 
-  # ====  xxl-job start  ====
-  xxl-job-arm:
-    container_name: xxl-job-arm_v2.4.0
-    image: kuschzzp/xxl-job-aarch64:2.4.0
-    environment:
-      SPRING_DATASOURCE_URL: 'jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC'
-      SPRING_DATASOURCE_USERNAME: 'test_01'
-      SPRING_DATASOURCE_PASSWORD: '123456'
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'com.mysql.cj.jdbc.Driver'
-    ports:
-      - 9056:8080
-    volumes:
-      - ./log/xxljob:/data/applogs
-    depends_on:
-      - mysql_v8
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.9
+  # # ====  xxl-job start  ====
+  # xxl-job-arm:
+  #   container_name: xxl-job-arm_v2.4.0
+  #   image: kuschzzp/xxl-job-aarch64:2.4.0
+  #   environment:
+  #     SPRING_DATASOURCE_URL: 'jdbc:mysql://mysql_v8:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC'
+  #     SPRING_DATASOURCE_USERNAME: 'test_01'
+  #     SPRING_DATASOURCE_PASSWORD: '123456'
+  #     SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'com.mysql.cj.jdbc.Driver'
+  #   ports:
+  #     - 9056:8080
+  #   volumes:
+  #     - ./log/xxljob:/data/applogs
+  #   depends_on:
+  #     - mysql_v8
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.9
 
-  # ====  xxl-job end  ====
+  # # ====  xxl-job end  ====
 
-  # ====  nacos start  ====
-  nacos:
-    image: nacos/nacos-server:v2.2.3-slim
-    container_name: nacos_v2_arm
-    ports:
-      - 8848:8848
-      - 9848:9848
-      - 9849:9849
-    environment:
-      TZ: Asia/Shanghai
-      SPRING_DATASOURCE_PLATFORM: mysql
-      MODE: standalone
-      PREFER_HOST_MODE: hostname
-      MYSQL_SERVICE_HOST: mysql_v8
-      MYSQL_SERVICE_PORT: 3306
-      MYSQL_SERVICE_USER: test_01
-      MYSQL_SERVICE_PASSWORD: 123456
-      MYSQL_SERVICE_DB_NAME: nacos
-      MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
-    volumes:
-      - ./log/nacos:/home/nacos/logs
-    depends_on:
-      mysql_v8:
-        condition: service_healthy
-    networks:
-      mynetwork:
-        ipv4_address: 192.168.1.10
-# ====  nacos end  ====
-# openresty:
-#   image: openresty/openresty:1.21.4.2-0-alpine-fat
-#   container_name: openresty_v1.21_alpine_fat
-#   environment:
-#     - TZ=Asia/Shanghai
-#   volumes:
-#     - ./log/openresty:/usr/local/openresty/nginx/logs
-#     - ./service/openresty/conf.d/:/etc/nginx/conf.d
-#   ports:
-#     - "10002:80"
-#   networks:
-#     mynetwork:
-#       ipv4_address: 192.168.1.11
+  # # ====  nacos start  ====
+  # nacos:
+  #   image: nacos/nacos-server:v2.2.3-slim
+  #   container_name: nacos_v2_arm
+  #   ports:
+  #     - 8848:8848
+  #     - 9848:9848
+  #     - 9849:9849
+  #   environment:
+  #     TZ: Asia/Shanghai
+  #     SPRING_DATASOURCE_PLATFORM: mysql
+  #     MODE: standalone
+  #     PREFER_HOST_MODE: hostname
+  #     MYSQL_SERVICE_HOST: mysql_v8
+  #     MYSQL_SERVICE_PORT: 3306
+  #     MYSQL_SERVICE_USER: test_01
+  #     MYSQL_SERVICE_PASSWORD: 123456
+  #     MYSQL_SERVICE_DB_NAME: nacos
+  #     MYSQL_SERVICE_DB_PARAM: characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
+  #   volumes:
+  #     - ./log/nacos:/home/nacos/logs
+  #   depends_on:
+  #     mysql_v8:
+  #       condition: service_healthy
+  #   networks:
+  #     mynetwork:
+  #       ipv4_address: 192.168.1.10
+  # # ====  nacos end  ====
+
+  # openresty:
+  #   image: openresty/openresty:1.21.4.2-0-alpine-fat
+  #   container_name: openresty_hello_world
+  #   environment:
+  #     - TZ=Asia/Shanghai
+  #   volumes:
+  #     - ./service/openresty/conf/:/etc/nginx/
+  #   ports:
+  #     - '10002:80'
+  #   networks:
+  #     - mynetwork
+  #   # 跑容器里面 执行下列命令 /usr/local/openresty/bin/openresty -c /etc/nginx/nginx.conf
+ 
+  # bytebase:
+  #   image: bytebase/bytebase:2.12.7
+  #   init: true
+  #   container_name: bytebase
+  #   restart: always
+  #   ports:
+  #     - 5678:5678
+  #   # # Uncomment the following lines to persist data
+  #   # volumes:
+  #   #   - ~/.bytebase/data:/var/opt/bytebase
+  #   command: ["--data", "/var/opt/bytebase", "--port", "5678", "--external-url", "http://127.0.0.1:5678"]
+
+  # employee-prod:
+  #   image: bytebase/sample-database:mysql-employee-small
+  #   ports:
+  #     - 3306:3306
+
+  # employee-test:
+  #   image: bytebase/sample-database:mysql-employee-small
+  #   ports:
+  #     - 3307:3306
