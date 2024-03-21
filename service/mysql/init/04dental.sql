@@ -1,5 +1,5 @@
 
-use dentist_ease_app;
+use dental_app;
 
 DROP TABLE IF EXISTS users;
 
